@@ -7,11 +7,17 @@ var express = require('express');
 var routes = require('./routes');
 var http = require('http');
 var path = require('path');
-
+var fs = require('fs');
+var https = require('https');
+var credentials = {
+    key: fs.readFileSync('./conf/key.pem'),
+    cert: fs.readFileSync('./conf/cert.pem')
+}
 var app = express();
 
 // all environments
 app.set('port', process.env.PORT || 3000);
+app.set('https-port', process.env.HTTPSPORT || 3001);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 app.use(express.favicon());
@@ -35,3 +41,8 @@ app.get('/contact', routes.contact);
 http.createServer(app).listen(app.get('port'), function () {
     console.log('Express server listening on port ' + app.get('port'));
 });
+var HttpsPort = app.get('https-port');
+function HttpsConsole() {
+    console.log('Secure Express server listening on port ' + HttpsPort);
+}
+https.createServer(credentials, app).listen(HttpsPort, HttpsConsole);
